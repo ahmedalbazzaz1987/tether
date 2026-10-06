@@ -36,5 +36,5 @@ PROTOCOL.md Wire protocol both apps implement
 ## Releasing an update
 
 1. Bump `session.AppVersion` (windows/core/session/common.go), `mac/VERSION` and the versions in `windows/winres/winres.json` (then regenerate the `.syso` files: `go-winres make --in winres/winres.json --arch amd64,arm64 --out cmd/tether/rsrc`).
-2. Push a tag `vX.Y.Z` — the *Release* workflow builds and publishes. If the macOS job fails, run `./build.sh --release` on your Mac and upload `Tether-macOS.zip` to the release by hand.
+2. Run `./mac/build.sh --release` on the Mac and copy `mac/build/Tether-macOS.zip` to `prebuilt/`, update `RELEASE_NOTES.md`, then commit and push to `main`. The *Release* workflow builds Windows (and macOS when the runner can) and publishes tag `v<VERSION>` automatically.
 3. Asset names the apps look for: `Tether-macOS.zip`, `Tether-Windows-x64.exe`, `Tether-Windows-arm64.exe`.

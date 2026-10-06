@@ -1,10 +1,15 @@
-# Builds Tether for Windows (and macOS) when you push a tag like v1.0.1,
-# and attaches the files to a GitHub release. The apps' built-in updater
-# downloads these files.
+# Publishes a GitHub release automatically whenever mac/VERSION or
+# RELEASE_NOTES.md changes on main (tag v<VERSION>). The apps' built-in
+# updater downloads the files attached here.
+#
+# To ship an update: bump the version (see README), refresh
+# prebuilt/Tether-macOS.zip with ./mac/build.sh --release, edit
+# RELEASE_NOTES.md, commit and push.
 name: Release
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+    paths: ["mac/VERSION", "RELEASE_NOTES.md"]
   workflow_dispatch:
 
 permissions:
@@ -33,7 +38,7 @@ jobs:
 
   macos:
     runs-on: macos-15
-    continue-on-error: true   # if this fails, build on your Mac with ./build.sh --release and upload the zip by hand
+    continue-on-error: true   # falls back to prebuilt/Tether-macOS.zip if the runner can't build
     steps:
       - uses: actions/checkout@v4
       - name: Build
@@ -49,10 +54,24 @@ jobs:
     if: always() && needs.windows.result == 'success'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - id: v
+        run: echo "version=$(tr -d '[:space:]' < mac/VERSION)" >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
+      - name: Mac fallback
+        run: |
+          if [ ! -f dist/Tether-macOS.zip ] && [ -f prebuilt/Tether-macOS.zip ]; then
+            cp prebuilt/Tether-macOS.zip dist/
+          fi
+          ls -la dist
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.v.outputs.version }}
+          name: Tether ${{ steps.v.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          target_commitish: ${{ github.sha }}
+          make_latest: "true"
           files: dist/*
