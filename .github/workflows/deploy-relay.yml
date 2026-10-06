@@ -1,0 +1,20 @@
+# Deploys the relay to your Cloudflare account.
+# One-time setup: add a repository secret CLOUDFLARE_API_TOKEN
+# (Cloudflare dashboard → My Profile → API Tokens → "Edit Cloudflare Workers" template),
+# then run this workflow from the Actions tab.
+name: Deploy relay
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["relay/**"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: relay

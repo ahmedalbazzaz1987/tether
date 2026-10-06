@@ -1,0 +1,12 @@
+mac/build/
+relay/node_modules/
+relay/.wrangler/
+dist/
+*.exe
+.DS_Store
+build.log
+*.tgz
+Tether-Release-*.zip
+Tether.zip
+release-*/
+Windows-ready/

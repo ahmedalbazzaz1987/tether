@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tether</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ HOME ============ -->
+  <section id="home" class="screen">
+    <header class="topbar">
+      <div class="brand"><span class="logo"></span>Tether</div>
+      <div class="spacer"></div>
+      <button class="icon-btn" id="btnSettings" title="Settings">
+        <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm7.4-2.5a7.6 7.6 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.3 7.3 0 0 0-1.7-1L15 3.5h-4l-.3 2.5a7.3 7.3 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 2l-2 1.6 2 3.4 2.4-1c.5.4 1.1.7 1.7 1l.3 2.5h4l.3-2.5c.6-.3 1.2-.6 1.7-1l2.4 1 2-3.4-2-1.6Z"/></svg>
+      </button>
+    </header>
+
+    <div id="updateBar" class="banner hidden">
+      <span id="updateText"></span>
+      <button class="btn small primary" id="btnUpdateNow">Update now</button>
+    </div>
+
+    <main class="grid">
+      <div class="card">
+        <div class="card-title">This computer</div>
+        <div class="label">Your ID</div>
+        <div class="big-row">
+          <div class="big mono" id="myId">— — —</div>
+          <button class="icon-btn" data-copy="id" title="Copy ID"><svg viewBox="0 0 24 24"><path d="M8 8h11v13H8zM5 3h11v3H7v11H5z"/></svg></button>
+        </div>
+        <div class="label">One-time password</div>
+        <div class="big-row">
+          <div class="big mono pw" id="myOtp">••••••••</div>
+          <button class="icon-btn" data-copy="otp" title="Copy password"><svg viewBox="0 0 24 24"><path d="M8 8h11v13H8zM5 3h11v3H7v11H5z"/></svg></button>
+          <button class="icon-btn" id="btnNewOtp" title="New password"><svg viewBox="0 0 24 24"><path d="M17.7 6.3A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.8-4.2L13 11h8V3z"/></svg></button>
+        </div>
+        <div class="hint">The password changes after every session. Set a permanent one in Settings for unattended access.</div>
+        <div class="status" id="hostStatus"><span class="dot"></span><span id="hostStatusText">Starting…</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Control a remote computer</div>
+        <form id="connectForm" autocomplete="off">
+          <div class="label">Partner ID or IP address</div>
+          <input id="inTarget" class="input mono" placeholder="123 456 789" spellcheck="false">
+          <div class="label">Password</div>
+          <input id="inPassword" class="input mono" type="password" placeholder="Password" spellcheck="false">
+          <div id="connectError" class="error hidden"></div>
+          <div id="keyWarn" class="warn hidden">
+            <b>Identity changed.</b> <span id="keyWarnText"></span>
+            <div class="row"><button type="button" class="btn small" id="btnTrustNew">Trust the new identity</button></div>
+          </div>
+          <div class="row">
+            <button class="btn primary grow" id="btnConnect" type="submit">Connect</button>
+            <button class="btn hidden" id="btnCancel" type="button">Cancel</button>
+          </div>
+        </form>
+        <div class="label recent-label">Recent</div>
+        <div id="recent" class="recent"><div class="empty">No recent connections</div></div>
+      </div>
+    </main>
+  </section>
+
+  <!-- ============ HOST SESSION ============ -->
+  <section id="hosting" class="screen hidden">
+    <header class="topbar alert">
+      <div class="brand"><span class="logo"></span>Tether</div>
+      <div class="spacer"></div>
+      <button class="btn danger" id="btnEndHost">Disconnect</button>
+    </header>
+    <div class="host-body">
+      <div class="host-hero">
+        <div class="pulse"></div>
+        <div>
+          <div class="host-title"><span id="hostViewer">Someone</span> is controlling this computer</div>
+          <div class="hint" id="hostKind"></div>
+        </div>
+      </div>
+      <div class="panel-wrap" id="hostPanel"></div>
+    </div>
+  </section>
+
+  <!-- ============ VIEWER SESSION ============ -->
+  <section id="viewer" class="screen hidden">
+    <div class="vbar" id="vbar">
+      <div class="vtitle"><span class="kind" id="vKind">Relay</span><b id="vName">Remote</b><span class="ping" id="vPing"></span></div>
+      <div class="spacer"></div>
+      <select id="vDisplay" class="select" title="Display"></select>
+      <select id="vQuality" class="select" title="Quality">
+        <option value="fast">Fast</option><option value="balanced">Balanced</option><option value="best">Best quality</option>
+      </select>
+      <div class="menu">
+        <button class="btn small" id="btnKeys">Keys ▾</button>
+        <div class="menu-list hidden" id="keysMenu">
+          <button data-combo="226,43">Alt + Tab</button>
+          <button data-combo="226,61">Alt + F4</button>
+          <button data-combo="227">Windows key</button>
+          <button data-combo="224,225,41">Ctrl + Shift + Esc</button>
+          <button data-combo="227,15">Lock (Win + L)</button>
+          <button data-combo="227,7">Show desktop (Win + D)</button>
+          <label class="menu-check"><input type="checkbox" id="chkSwap"> Swap Ctrl ⇄ Cmd (Mac)</label>
+        </div>
+      </div>
+      <button class="btn small" id="btnFit" title="Fit to window / actual size">Fit</button>
+      <button class="btn small" id="btnFull" title="Full screen (F11)">⛶</button>
+      <button class="btn small" id="btnChat" title="Chat and files">Chat &amp; files <span class="badge hidden" id="chatBadge"></span></button>
+      <button class="btn small danger" id="btnDisconnect">Disconnect</button>
+    </div>
+    <div class="stage" id="stage">
+      <canvas id="screen" tabindex="0"></canvas>
+      <div class="stage-msg" id="stageMsg">Waiting for the first picture…</div>
+    </div>
+    <aside class="drawer hidden" id="drawer"></aside>
+  </section>
+
+  <!-- ============ SETTINGS ============ -->
+  <div id="settings" class="overlay hidden">
+    <div class="sheet">
+      <div class="sheet-head"><b>Settings</b><div class="spacer"></div><button class="icon-btn" id="btnCloseSettings">✕</button></div>
+      <div class="sheet-body">
+        <div class="group">
+          <div class="group-title">Connection</div>
+          <label class="field">Relay address
+            <input id="setRelay" class="input mono" placeholder="tether-relay.yourname.workers.dev" spellcheck="false">
+            <span class="hint">Your private relay for connections over the internet. Leave empty for local network only.</span>
+          </label>
+          <label class="toggle"><input type="checkbox" id="setAccept"><span>Allow others to connect to this computer</span></label>
+          <label class="toggle"><input type="checkbox" id="setLan"><span>Allow direct connections on the local network</span></label>
+          <div class="hint" id="lanInfo"></div>
+        </div>
+        <div class="group">
+          <div class="group-title">Unattended access</div>
+          <div class="hint" id="permState"></div>
+          <div class="row">
+            <input id="setPerm" class="input mono grow" type="password" placeholder="New permanent password (8+ characters)">
+            <button class="btn" id="btnSetPerm">Save</button>
+            <button class="btn" id="btnClearPerm">Remove</button>
+          </div>
+          <label class="toggle"><input type="checkbox" id="setLogin"><span>Start Tether when I sign in</span></label>
+        </div>
+        <div class="group">
+          <div class="group-title">Session</div>
+          <label class="toggle"><input type="checkbox" id="setClip"><span>Share clipboard text</span></label>
+          <div class="row">
+            <span class="grow">Received files go to <span class="mono small" id="dlPath"></span></span>
+            <button class="btn small" id="btnOpenDl">Open folder</button>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-title">Security</div>
+          <div class="hint">This computer's identity fingerprint: <b class="mono" id="fp"></b>. Viewers remember it and warn you if it ever changes.</div>
+          <div class="hint">Sessions are end-to-end encrypted (X25519 + AES-256-GCM). The relay only forwards encrypted data.</div>
+        </div>
+        <div class="group">
+          <div class="group-title">Updates</div>
+          <label class="toggle"><input type="checkbox" id="setAutoUpd"><span>Check for updates automatically</span></label>
+          <div class="row"><span class="grow hint" id="updMsg"></span><button class="btn small" id="btnCheckUpd">Check now</button></div>
+          <div class="hint">Version <span id="ver"></span></div>
+        </div>
+        <div class="group">
+          <div class="group-title">Remove</div>
+          <div class="row">
+            <button class="btn" id="btnQuit">Quit Tether</button>
+            <button class="btn danger" id="btnUninstall">Uninstall Tether…</button>
+          </div>
+          <div class="hint">Uninstall removes Tether's settings, the sign-in entry and the program itself. Files you received stay in your Downloads folder.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirm" class="overlay hidden">
+    <div class="sheet small-sheet">
+      <div class="sheet-body">
+        <p id="confirmText"></p>
+        <div class="row end"><button class="btn" id="confirmNo">Cancel</button><button class="btn danger" id="confirmYes">Uninstall</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+</div>
+<template id="panelTpl">
+  <div class="panel">
+    <div class="tabs"><button class="tab active" data-tab="chat">Chat</button><button class="tab" data-tab="files">Files</button></div>
+    <div class="tab-body chat-body">
+      <div class="chat-log"></div>
+      <form class="chat-form"><input class="input chat-in" placeholder="Message…"><button class="btn primary">Send</button></form>
+    </div>
+    <div class="tab-body files-body hidden">
+      <div class="row"><button class="btn primary btn-send-file">Send files…</button><button class="btn btn-open-dl">Open received</button></div>
+      <div class="file-list"><div class="empty">No transfers yet</div></div>
+    </div>
+  </div>
+</template>
+<script src="app.js"></script>
+</body>
+</html>
